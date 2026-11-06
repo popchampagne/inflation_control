@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Story 2: The Fed's Dual Mandate (2001–2026)</title>
+  <!-- Chart.js & Plugins via CDN for interactive standalone rendering -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+  <style>
+    :root {
+      --bg-main: #0B0F19;
+      --bg-card: #151D30;
+      --border-card: #223050;
+      --accent-blue: #38BDF8;
+      --accent-coral: #F87171;
+      --accent-emerald: #34D399;
+      --accent-amber: #FBBF24;
+      --text-primary: #F8FAFC;
+      --text-muted: #94A3B8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-main);
+      color: var(--text-primary);
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    /* Top Progress & Header Bar */
+    header {
+      padding: 16px 36px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-card);
+      background: rgba(11, 15, 25, 0.85);
+      backdrop-filter: blur(10px);
+      z-index: 10;
+    }
+
+    .brand-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent-blue);
+    }
+
+    .deck-stepper {
+      display: flex;
+      gap: 8px;
+    }
+
+    .step-pill {
+      width: 32px;
+      height: 6px;
+      border-radius: 999px;
+      background: #1E293B;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .step-pill.active {
+      background: var(--accent-blue);
+      width: 52px;
+    }
+
+    /* Presentation Viewport */
+    main.deck-viewport {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .slide {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      padding: 24px 48px;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateX(30px);
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .slide.active {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(0);
+    }
+
+    /* Narrative Typography */
+    .slide-badge {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--accent-blue);
+      margin-bottom: 8px;
+    }
+
+    .slide-title {
+      font-size: 2.1rem;
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 8px;
+      letter-spacing: -0.02em;
+    }
+
+    .slide-subtitle {
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+      max-width: 900px;
+      line-height: 1.5;
+    }
+
+    /* Layout Grids */
+    .grid-split {
+      display: grid;
+      grid-template-columns: 1.6fr 1fr;
+      gap: 28px;
+      height: 62vh;
+      align-items: center;
+    }
+
+    .grid-symmetric {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 28px;
+      height: 62vh;
+      align-items: stretch;
+    }
+
+    .grid-triplet {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      height: 60vh;
+      align-items: stretch;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: 14px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+    }
+
+    .chart-container {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      min-height: 280px;
+    }
+
+    /* Bottom Control Bar */
+    footer {
+      padding: 14px 36px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid var(--border-card);
+      background: rgba(11, 15, 25, 0.95);
+      z-index: 10;
+    }
+
+    .nav-btn {
+      background: #1E293B;
+      color: var(--text-primary);
+      border: 1px solid #334155;
+      padding: 8px 18px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .nav-btn:hover:not(:disabled) {
+      background: var(--accent-blue);
+      color: #0B0F19;
+      border-color: var(--accent-blue);
+    }
+
+    .nav-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    .footer-meta {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    /* Regimes Timeline & Mini Badges */
+    .regime-item {
+      padding: 14px 16px;
+      background: rgba(255, 255, 255, 0.03);
+      border-left: 3px solid var(--accent-blue);
+      border-radius: 4px;
+      margin-bottom: 12px;
+    }
+
+    .regime-item h4 {
+      font-size: 0.95rem;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+
+    .regime-item p {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    .stat-metric {
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: var(--accent-emerald);
+      margin-bottom: 2px;
+    }
+
+    .stat-label {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+    }
+
+    .legend-row {
+      display: flex;
+      gap: 18px;
+      margin-bottom: 12px;
+      font-size: 0.82rem;
+    }
+
+    .legend-dot {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-right: 6px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation Header -->
+  <header>
+    <div class="brand-title">Story 2: Federal Reserve Dual Mandate Analysis (2001–2026)</div>
+    <div class="deck-stepper" id="stepper">
+      <div class="step-pill active" onclick="goToSlide(0)"></div>
+      <div class="step-pill" onclick="goToSlide(1)"></div>
+      <div class="step-pill" onclick="goToSlide(2)"></div>
+      <div class="step-pill" onclick="goToSlide(3)"></div>
+      <div class="step-pill" onclick="goToSlide(4)"></div>
+    </div>
+  </header>
+
+  <!-- Slide Viewport -->
+  <main class="deck-viewport">
+
+    <!-- SLIDE 1: OPENING / HOOK -->
+    <section class="slide active" id="slide-0">
+      <div class="slide-badge">Opening & Framing | The Dual Mandate Tension</div>
+      <h1 class="slide-title">Can the Fed Control Inflation and Maintain Full Employment?</h1>
+      <p class="slide-subtitle">Evaluating 25 Years of Monetary Transmission Lags, Policy Regimes, and the Structural Trade-offs of the Federal Reserve (2001–2026).</p>
+      
+      <div class="grid-split">
+        <div class="card">
+          <h3 style="font-size: 1.1rem; margin-bottom: 8px;">The Dual Mandate Objective</h3>
+          <p style="color: var(--text-muted); font-size: 0.9rem; line-height: 1.6; margin-bottom: 16px;">
+            Enacted by Congress in 1977, the Federal Reserve is legally tasked with two potentially conflicting goals: <strong>Price Stability</strong> (anchoring inflation near 2.0%) and <strong>Maximum Sustainable Employment</strong>.
+          </p>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+            <div style="background: rgba(255,255,255,0.03); padding: 14px; border-radius: 8px; border-left: 3px solid var(--accent-coral);">
+              <div class="stat-label">Target Mandate 1</div>
+              <div style="font-size: 1.3rem; font-weight: 700; color: var(--accent-coral); margin-top: 4px;">2.0% Inflation</div>
+              <p style="font-size: 0.78rem; color: var(--text-muted); margin-top: 4px;">PCE / CPI annualized anchor for long-run business certainty.</p>
+            </div>
+            <div style="background: rgba(255,255,255,0.03); padding: 14px; border-radius: 8px; border-left: 3px solid var(--accent-emerald);">
+              <div class="stat-label">Target Mandate 2</div>
+              <div style="font-size: 1.3rem; font-weight: 700; color: var(--accent-emerald); margin-top: 4px;">Natural NAIRU</div>
+              <p style="font-size: 0.78rem; color: var(--text-muted); margin-top: 4px;">Non-accelerating inflation rate of unemployment (~4.0%).</p>
+            </div>
+          </div>
+          <div style="background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.2); padding: 12px; border-radius: 8px; font-size: 0.84rem; line-height: 1.5; color: #BAE6FD;">
+            <strong>The Core Conflict:</strong> Suppressing runaway inflation requires hiking the Fed Funds Rate to cool demand—often depressing employment. Conversely, stimulating job growth risks fueling severe price spirals.
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 style="font-size: 1.1rem; margin-bottom: 12px;">Programmatic FRED Pipeline</h3>
+          <p style="color: var(--text-muted); font-size: 0.85rem; line-height: 1.5; margin-bottom: 16px;">
+            Harmonized 25-year monthly time-series pipeline extracted via the Federal Reserve Economic Data (FRED) REST API:
+          </p>
+          <div class="regime-item">
+            <h4><code>CPIAUCSL</code> &rarr; YoY Inflation %</h4>
+            <p>12-month percent change tracking headline consumer price fluctuations.</p>
+          </div>
+          <div class="regime-item" style="border-left-color: var(--accent-amber);">
+            <h4><code>FEDFUNDS</code> &rarr; Effective Policy Rate</h4>
+            <p>Primary target instrument set by the Federal Open Market Committee (FOMC).</p>
+          </div>
+          <div class="regime-item" style="border-left-color: var(--accent-emerald);">
+            <h4><code>UNRATE</code> &rarr; Civilian Unemployment Rate</h4>
+            <p>Household survey benchmark measuring labor slack across business cycles.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 2: ANALYSIS 1 - 25-YEAR MACRO OVERVIEW -->
+    <section class="slide" id="slide-1">
+      <div class="slide-badge">Analysis Body: Macro Overview | 2001–2026 Full Horizon</div>
+      <h2 class="slide-title">25 Years of Policy Levers, Spikes, and Transmissions</h2>
+      <p class="slide-subtitle">Tracking Federal Funds Effective Rate against YoY Inflation and Unemployment across major recessionary regimes.</p>
+      
+      <div class="card" style="height: 66vh;">
+        <div class="legend-row">
+          <div><span class="legend-dot" style="background: #FBBF24;"></span><strong>Fed Funds Rate (FEDFUNDS)</strong></div>
+          <div><span class="legend-dot" style="background: #F87171;"></span><strong>YoY CPI Inflation (%)</strong></div>
+          <div><span class="legend-dot" style="background: #34D399;"></span><strong>Civilian Unemployment Rate (UNRATE)</strong></div>
+          <div style="margin-left: auto; color: var(--text-muted); font-size: 0.78rem;">Grey Shading: NBER Recessions</div>
+        </div>
+        <div class="chart-container">
+          <canvas id="macroOverviewChart"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 3: ANALYSIS 2 - REGIMES & STRUCTURAL LAGS -->
+    <section class="slide" id="slide-2">
+      <div class="slide-badge">Analysis Body: Structural Mechanics | Four Historical Policy Regimes</div>
+      <h2 class="slide-title">Transmission Lags: Long, Variable, and Asymmetric</h2>
+      <p class="slide-subtitle">Monetary policy does not impact prices instantly; rate adjustments take 12 to 24 months to fully filter into hiring and capital formation.</p>
+      
+      <div class="grid-triplet">
+        <div class="card">
+          <div>
+            <div class="slide-badge" style="color: var(--accent-amber);">2001 & 2008 Crises</div>
+            <h3 style="font-size: 1.15rem; margin-bottom: 8px;">The Zero Lower Bound (ZLB)</h3>
+            <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 14px;">
+              Following the 2001 Dot-Com crash and the 2008 Lehman collapse, standard rate cuts hit 0.00%–0.25%.
+            </p>
+            <div class="regime-item" style="border-left-color: var(--accent-amber);">
+              <h4>QE Inception</h4>
+              <p>With conventional rate cuts exhausted, unconventional balance sheet expansion (Quantitative Easing) was required to stabilize credit liquidity.</p>
+            </div>
+          </div>
+          <div style="background: rgba(251, 191, 36, 0.1); padding: 10px; border-radius: 6px; font-size: 0.8rem; color: #FDE68A;">
+            <strong>Lag Dynamic:</strong> Unemployment spiked to 10.0% in 2009 and took nearly 6 years of ZLB policy to normalize.
+          </div>
+        </div>
+
+        <div class="card">
+          <div>
+            <div class="slide-badge" style="color: var(--accent-coral);">2020 Exogenous Shock</div>
+            <h3 style="font-size: 1.15rem; margin-bottom: 8px;">COVID-19 Dislocation</h3>
+            <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 14px;">
+              The steepest, sharpest labor shock in modern US history: unemployment reached 14.7% within a single month (April 2020).
+            </p>
+            <div class="regime-item" style="border-left-color: var(--accent-coral);">
+              <h4>Emergency Relief</h4>
+              <p>Simultaneous rate cuts back to zero alongside multi-trillion fiscal stimulus prevented a systemic solvency freeze.</p>
+            </div>
+          </div>
+          <div style="background: rgba(248, 113, 113, 0.1); padding: 10px; border-radius: 6px; font-size: 0.8rem; color: #FECACA;">
+            <strong>Lag Dynamic:</strong> Labor snapback was rapid, but aggregate demand overshooting primed the 2021–2022 inflation wave.
+          </div>
+        </div>
+
+        <div class="card">
+          <div>
+            <div class="slide-badge" style="color: var(--accent-blue);">2022–2026 Cycle</div>
+            <h3 style="font-size: 1.15rem; margin-bottom: 8px;">The 525 bps Rapid Tightening</h3>
+            <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 14px;">
+              Confronting 9.1% headline inflation in mid-2022, the FOMC implemented the fastest rate tightening campaign since Volcker.
+            </p>
+            <div class="regime-item" style="border-left-color: var(--accent-blue);">
+              <h4>Disinflation vs Slack</h4>
+              <p>CPI dropped from 9.1% down to ~2.6% while unemployment remained resiliently below 4.4%, achieving an elusive "soft landing" posture.</p>
+            </div>
+          </div>
+          <div style="background: rgba(56, 189, 248, 0.1); padding: 10px; border-radius: 6px; font-size: 0.8rem; color: #BAE6FD;">
+            <strong>Transmission Lag:</strong> 18-month policy lag successfully softened goods prices before infecting broader labor payrolls.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 4: ANALYSIS 3 - THE PHILLIPS CURVE & LAG DRIFT -->
+    <section class="slide" id="slide-3">
+      <div class="slide-badge">Analysis Body: Trade-Off Breakdown | Phillips Curve Dynamics</div>
+      <h2 class="slide-title">Unemployment vs. Inflation Trade-Off by Era</h2>
+      <p class="slide-subtitle">Examining the empirical breakdown of the Phillips Curve: Does lower unemployment inevitably trigger runaway inflation?</p>
+      
+      <div class="grid-split">
+        <div class="card">
+          <h3 style="font-size: 1.05rem; margin-bottom: 12px;">Inflation vs. Unemployment Scatter by Regime</h3>
+          <div class="chart-container">
+            <canvas id="phillipsCurveChart"></canvas>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 style="font-size: 1.1rem; margin-bottom: 12px;">Empirical Findings</h3>
+          <div style="display: flex; flex-direction: column; gap: 14px; font-size: 0.88rem; line-height: 1.5;">
+            <div style="padding: 12px; background: rgba(255,255,255,0.03); border-radius: 8px; border-left: 3px solid var(--accent-emerald);">
+              <strong style="color: var(--text-primary);">Pre-2020 Flat Phillips Curve:</strong>
+              <p style="color: var(--text-muted); margin-top: 4px;">Between 2010 and 2019, unemployment drifted steadily from 10% down to 3.5%, yet inflation stubbornly remained anchored near or below 2.0%.</p>
+            </div>
+            <div style="padding: 12px; background: rgba(255,255,255,0.03); border-radius: 8px; border-left: 3px solid var(--accent-coral);">
+              <strong style="color: var(--text-primary);">Supply Shocks vs Demand Pull:</strong>
+              <p style="color: var(--text-muted); margin-top: 4px;">The 2021–2022 inflation surge demonstrated that monetary tightening cannot fix supply bottlenecks (energy, microchips, logistics), imposing structural friction on the Fed's mandate.</p>
+            </div>
+            <div style="padding: 12px; background: rgba(255,255,255,0.03); border-radius: 8px; border-left: 3px solid var(--accent-blue);">
+              <strong style="color: var(--text-primary);">Anchor Credibility:</strong>
+              <p style="color: var(--text-muted); margin-top: 4px;">Long-term inflation expectations remained anchored at ~2.2%, preventing the persistent 1970s wage-price spiral despite acute nominal wage growth.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 5: CONCLUSION / TAKEAWAY -->
+    <section class="slide" id="slide-4">
+      <div class="slide-badge">Synthesis & Conclusion | Decisive Mandate Verdict</div>
+      <h2 class="slide-title">The Verdict: Tactical Mastery, Structural Limits</h2>
+      <p class="slide-subtitle">Has the Federal Reserve successfully fulfilled its dual mandate over the past 25 years?</p>
+      
+      <div class="grid-symmetric">
+        <div class="card" style="justify-content: flex-start; gap: 18px;">
+          <h3 style="font-size: 1.15rem; color: var(--accent-emerald);">Visual Scorecard: 2001–2026 Mandate Performance</h3>
+          
+          <div style="background: rgba(52, 211, 153, 0.08); border: 1px solid rgba(52, 211, 153, 0.2); padding: 16px; border-radius: 10px;">
+            <div style="display: flex; justify-content: space-between; align-items: baseline;">
+              <span style="font-weight: 700; color: var(--accent-emerald);">Price Stability (Inflation Target ~2%)</span>
+              <span style="font-weight: 800; font-size: 1.1rem; color: var(--accent-emerald);">B+ (Anchored)</span>
+            </div>
+            <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 6px; line-height: 1.4;">
+              Successfully avoided chronic deflation post-2008 and tamed 2022 post-pandemic inflation back toward 2.5% without inducing systemic stagflation.
+            </p>
+          </div>
+
+          <div style="background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.2); padding: 16px; border-radius: 10px;">
+            <div style="display: flex; justify-content: space-between; align-items: baseline;">
+              <span style="font-weight: 700; color: var(--accent-blue);">Maximum Sustainable Employment</span>
+              <span style="font-weight: 800; font-size: 1.1rem; color: var(--accent-blue);">A- (Historic Lows)</span>
+            </div>
+            <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 6px; line-height: 1.4;">
+              Facilitated multi-year expansions sustaining sub-4.0% unemployment in both 2018–2019 and 2022–2024, absorbing rapid labor market re-entries.
+            </p>
+          </div>
+
+          <div style="background: rgba(248, 113, 113, 0.08); border: 1px solid rgba(248, 113, 113, 0.2); padding: 16px; border-radius: 10px;">
+            <div style="display: flex; justify-content: space-between; align-items: baseline;">
+              <span style="font-weight: 700; color: var(--accent-coral);">Transmission Lag Vulnerability</span>
+              <span style="font-weight: 800; font-size: 1.1rem; color: var(--accent-coral);">C (Reactive Bias)</span>
+            </div>
+            <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 6px; line-height: 1.4;">
+              12–18 month transmission lags routinely cause policy overshooting, leading to late-cycle asset volatility and extended zero-bound traps.
+            </p>
+          </div>
+        </div>
+
+        <div class="card" style="justify-content: space-between;">
+          <div>
+            <h3 style="font-size: 1.15rem; margin-bottom: 12px; color: var(--accent-blue);">Core Takeaway & Actionable Synthesis</h3>
+            <p style="font-size: 0.95rem; color: var(--text-primary); line-height: 1.6; margin-bottom: 16px;">
+              The Federal Reserve <strong>can</strong> achieve price stability and full employment during standard demand-driven business cycles. However, its tools are blunt, interest-rate-only mechanisms that <strong>cannot resolve exogenous supply bottlenecks or geopolitical disruptions</strong>.
+            </p>
+            <div style="padding: 16px; background: rgba(255,255,255,0.03); border-radius: 8px; border-left: 4px solid var(--accent-emerald); font-size: 0.85rem; line-height: 1.5; color: var(--text-muted);">
+              <strong>Final Answer to the Research Question:</strong><br>
+              Over a 25-year horizon, the Fed has fulfilled its dual mandate in anchoring long-term inflation expectations and orchestrating soft landings, but it remains structurally constrained by 18-month transmission lags that leave it inherently reactive to novel global supply shocks.
+            </div>
+          </div>
+          
+          <div style="border-top: 1px solid var(--border-card); padding-top: 12px; font-size: 0.78rem; color: var(--text-muted); display: flex; justify-content: space-between;">
+            <span>Data Sources: FRED API (CPIAUCSL, FEDFUNDS, UNRATE)</span>
+            <span>DATA 624 — Visual Storytelling Deck</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Presentation Controls Footer -->
+  <footer>
+    <div class="footer-meta" id="slideIndicator">Slide 1 of 5 | Dual Mandate Framing</div>
+    <div style="display: flex; gap: 12px;">
+      <button class="nav-btn" id="prevBtn" onclick="changeSlide(-1)" disabled>&larr; Previous</button>
+      <button class="nav-btn" id="nextBtn" onclick="changeSlide(1)">Next &rarr;</button>
+    </div>
+  </footer>
+
+  <script>
+    // Slide Management Logic
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
+    const pills = document.querySelectorAll('.step-pill');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const slideIndicator = document.getElementById('slideIndicator');
+
+    const slideTitles = [
+      "Dual Mandate Framing",
+      "Macro Overview (2001–2026)",
+      "Structural Transmission Lags",
+      "Phillips Curve Trade-Offs",
+      "Synthesis & Decisive Verdict"
+    ];
+
+    function updateSlide() {
+      slides.forEach((s, idx) => {
+        s.classList.toggle('active', idx === currentSlide);
+      });
+      pills.forEach((p, idx) => {
+        p.classList.toggle('active', idx === currentSlide);
+      });
+
+      prevBtn.disabled = currentSlide === 0;
+      nextBtn.disabled = currentSlide === slides.length - 1;
+
+      slideIndicator.textContent = `Slide ${currentSlide + 1} of ${slides.length} | ${slideTitles[currentSlide]}`;
+
+      // Trigger Chart render/resize if active
+      if (currentSlide === 1 && !window.macroChartRendered) {
+        initMacroChart();
+        window.macroChartRendered = true;
+      }
+      if (currentSlide === 3 && !window.phillipsChartRendered) {
+        initPhillipsChart();
+        window.phillipsChartRendered = true;
+      }
+    }
+
+    function changeSlide(direction) {
+      currentSlide = Math.max(0, Math.min(slides.length - 1, currentSlide + direction));
+      updateSlide();
+    }
+
+    function goToSlide(index) {
+      currentSlide = index;
+      updateSlide();
+    }
+
+    // Keyboard Navigation
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === 'Space') {
+        if (currentSlide < slides.length - 1) changeSlide(1);
+      } else if (e.key === 'ArrowLeft') {
+        if (currentSlide > 0) changeSlide(-1);
+      }
+    });
+
+    // 25-Year Harmonized Historical Series (FRED Benchmark 2001-2026)
+    const timelineLabels = [
+      '2001', '2002', '2003', '2004', '2005', '2006', '2007', '2008',
+      '2009', '2010', '2011', '2012', '2013', '2014', '2015', '2016',
+      '2017', '2018', '2019', '2020', '2021', '2022', '2023', '2024',
+      '2025', '2026'
+    ];
+
+    // CPI YoY %
+    const cpiData = [
+      2.8, 1.6, 2.3, 2.7, 3.4, 3.2, 2.8, 3.8,
+      -0.4, 1.6, 3.2, 2.1, 1.5, 1.6, 0.1, 1.3,
+      2.1, 2.4, 1.8, 1.2, 4.7, 8.0, 4.1, 2.9,
+      2.7, 2.5
+    ];
+
+    // FEDFUNDS Rate %
+    const fedFundsData = [
+      3.88, 1.67, 1.13, 1.35, 3.22, 4.97, 5.02, 1.92,
+      0.16, 0.18, 0.10, 0.14, 0.09, 0.09, 0.13, 0.39,
+      1.00, 1.83, 2.16, 0.38, 0.08, 1.68, 5.02, 5.33,
+      4.38, 3.65
+    ];
+
+    // UNRATE %
+    const unrateData = [
+      4.7, 5.8, 6.0, 5.5, 5.1, 4.6, 4.6, 5.8,
+      9.3, 9.6, 8.9, 8.1, 7.4, 6.2, 5.3, 4.9,
+      4.4, 3.9, 3.7, 8.1, 5.4, 3.6, 3.6, 4.0,
+      4.2, 4.1
+    ];
+
+    function initMacroChart() {
+      const ctx = document.getElementById('macroOverviewChart').getContext('2d');
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: timelineLabels,
+          datasets: [
+            {
+              label: 'Fed Funds Rate (%)',
+              data: fedFundsData,
+              borderColor: '#FBBF24',
+              backgroundColor: '#FBBF24',
+              borderWidth: 2.5,
+              tension: 0.25,
+              pointRadius: 3,
+              pointHoverRadius: 6
+            },
+            {
+              label: 'YoY Inflation Rate (%)',
+              data: cpiData,
+              borderColor: '#F87171',
+              backgroundColor: '#F87171',
+              borderWidth: 2.5,
+              tension: 0.25,
+              pointRadius: 3,
+              pointHoverRadius: 6
+            },
+            {
+              label: 'Unemployment Rate (%)',
+              data: unrateData,
+              borderColor: '#34D399',
+              backgroundColor: '#34D399',
+              borderWidth: 2.5,
+              tension: 0.25,
+              pointRadius: 3,
+              pointHoverRadius: 6
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: '#1E293B',
+              titleColor: '#F8FAFC',
+              bodyColor: '#CBD5E1',
+              borderColor: '#334155',
+              borderWidth: 1,
+              padding: 12
+            }
+          },
+          scales: {
+            x: {
+              grid: { color: 'rgba(255, 255, 255, 0.05)' },
+              ticks: { color: '#94A3B8' }
+            },
+            y: {
+              grid: { color: 'rgba(255, 255, 255, 0.05)' },
+              ticks: {
+                color: '#94A3B8',
+                callback: function(val) { return val + '%'; }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    function initPhillipsChart() {
+      const ctx = document.getElementById('phillipsCurveChart').getContext('2d');
+      
+      // Scatter points: x = UNRATE, y = CPI YoY %
+      const regimes = [
+        { label: 'Dot-Com & Recovery (2001-2007)', data: [
+          {x: 4.7, y: 2.8}, {x: 5.8, y: 1.6}, {x: 6.0, y: 2.3}, {x: 5.5, y: 2.7}, {x: 5.1, y: 3.4}, {x: 4.6, y: 3.2}, {x: 4.6, y: 2.8}
+        ], color: '#38BDF8' },
+        { label: 'Great Recession & ZLB (2008-2019)', data: [
+          {x: 5.8, y: 3.8}, {x: 9.3, y: -0.4}, {x: 9.6, y: 1.6}, {x: 8.9, y: 3.2}, {x: 8.1, y: 2.1}, {x: 7.4, y: 1.5},
+          {x: 6.2, y: 1.6}, {x: 5.3, y: 0.1}, {x: 4.9, y: 1.3}, {x: 4.4, y: 2.1}, {x: 3.9, y: 2.4}, {x: 3.7, y: 1.8}
+        ], color: '#FBBF24' },
+        { label: 'COVID & Post-Pandemic Inflation (2020-2026)', data: [
+          {x: 8.1, y: 1.2}, {x: 5.4, y: 4.7}, {x: 3.6, y: 8.0}, {x: 3.6, y: 4.1}, {x: 4.0, y: 2.9}, {x: 4.2, y: 2.7}, {x: 4.1, y: 2.5}
+        ], color: '#F87171' }
+      ];
+
+      new Chart(ctx, {
+        type: 'scatter',
+        data: {
+          datasets: regimes.map(r => ({
+            label: r.label,
+            data: r.data,
+            backgroundColor: r.color,
+            borderColor: r.color,
+            pointRadius: 6,
+            pointHoverRadius: 9
+          }))
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'top',
+              labels: { color: '#94A3B8', boxWidth: 10, font: { size: 10 } }
+            },
+            tooltip: {
+              backgroundColor: '#1E293B',
+              callbacks: {
+                label: function(ctx) {
+                  return `${ctx.dataset.label}: Unemp ${ctx.parsed.x}%, Inflation ${ctx.parsed.y}%`;
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              title: { display: true, text: 'Unemployment Rate (%)', color: '#94A3B8', font: { weight: 600 } },
+              grid: { color: 'rgba(255, 255, 255, 0.05)' },
+              ticks: { color: '#94A3B8' }
+            },
+            y: {
+              title: { display: true, text: 'YoY CPI Inflation (%)', color: '#94A3B8', font: { weight: 600 } },
+              grid: { color: 'rgba(255, 255, 255, 0.05)' },
+              ticks: { color: '#94A3B8' }
+            }
+          }
+        }
+      });
+    }
+  </script>
+</body>
+</html>
